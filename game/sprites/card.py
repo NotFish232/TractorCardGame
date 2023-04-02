@@ -15,15 +15,4 @@ BORDER_WIDTH: int = 2
 class CardSprite(arcade.Sprite):
     def __init__(self: Self, card: Card) -> None:
         filename: str = str(card).replace(" ", "_").lower() + ".png"
-        super().__init__(ASSETS_FOLDER / filename, CARD_SCALE, hit_box_algorithm=None)
-
-    def draw(self: Self) -> None:
-        arcade.draw_rectangle_outline(
-            self.center_x,
-            self.center_y,
-            self.width,
-            self.height,
-            arcade.color.BLACK,
-            BORDER_WIDTH,
-        )
-        super().draw()
+        super().__init__(ASSETS_FOLDER / filename, CARD_SCALE, hit_box_algorithm=None) 

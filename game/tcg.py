@@ -75,15 +75,10 @@ class TractorCardGame(arcade.Window):
         while not self.board.is_rotating:
             time.sleep(1 / FPS)
 
-    def draw_cards(self: Self) -> None:
-        card_set: arcade.SpriteList = self.card_sprites[self.current_player_index]
-        for card_sprite in card_set:
-            card_sprite.draw()
-
     def on_update(self: Self, delta: float) -> None:
         pass
 
     def on_draw(self: Self) -> None:
         self.clear(BACKGROUND_COLOR)
         self.board.draw()
-        self.draw_cards()
+        self.card_sprites[self.current_player_index].draw()
