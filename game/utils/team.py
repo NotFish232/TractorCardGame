@@ -18,6 +18,6 @@ class Team:
         raise NotImplementedError("Comparision only supported with other team objects")
 
     def __str__(self: Self) -> str:
-        return f"Team{self.id}"
+        return f"Team{self.id} (pts={self.points})"
 
     __repr__: Callable[..., str] = __str__

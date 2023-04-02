@@ -10,7 +10,7 @@ from game.utils.player import Player
 from game.utils.team import Team
 
 from .sprites.board import Board
-from .sprites.card import CardSprite
+from .sprites.card_group import CardGroup
 
 BACKGROUND_COLOR: arcade.Color = (211, 211, 211)
 SCREEN_WIDTH: int = 1200
@@ -31,10 +31,8 @@ class TractorCardGame(arcade.Window):
         self.current_player_index: int = 0
 
         self.infoset: InfoSet = InfoSet()
-        self.banker_card_sprites: arcade.SpriteList = arcade.SpriteList()
-        self.card_sprites: list[arcade.SpriteList] = [
-            arcade.SpriteList() for _ in range(number_of_players)
-        ]
+        self.banker_card_sprites: CardGroup = None
+        self.card_sprites: list[CardGroup] = []
         self.card_deck: CardDeck = CardDeck()
         self.infoset.teams = [Team(), Team()]
         self.infoset.players = [
@@ -44,36 +42,55 @@ class TractorCardGame(arcade.Window):
 
         self.set_update_rate(1 / FPS)
         self.deal_cards()
-        self.set_card_positions()
-
-        print(self.infoset)
 
     def deal_cards(self: Self) -> None:
+        x_position: float = SCREEN_WIDTH / 2
+        y_position: float = SCREEN_HEIGHT * 1 / 8
+
         for _ in range(NUM_DEAL_CARDS):
-            for i, player in enumerate(self.infoset.players):
+            for player in self.infoset.players:
                 card: Card = self.card_deck.deal_card()
                 player.cards.append(card)
-                self.card_sprites[i].append(CardSprite(card))
+
+        self.card_sprites = [
+            CardGroup(
+                p.cards,
+                x_position,
+                y_position,
+                is_visible=(i == self.current_player_index),
+            )
+            for i, p in enumerate(self.infoset.players)
+        ]
 
         while self.card_deck.has_cards():
             card: Card = self.card_deck.deal_card()
             self.infoset.bank_cards.append(card)
-            self.banker_card_sprites.append(CardSprite(card))
 
-    def set_card_positions(self: Self) -> None:
-        interval: int = 40
-        x_offset: float = SCREEN_WIDTH / 2 - interval * 12.5
-        y_offset: float = SCREEN_HEIGHT * 5 / 32
+        self.banker_card_sprites = CardGroup(self.infoset.bank_cards, is_visible=False)
 
-        for card_set in self.card_sprites:
-            for i, card_sprite in enumerate(card_set):
-                card_sprite.set_position(x_offset + i * interval, y_offset)
+    def next_round(self: Self) -> None:
+        pass
+
+    def reset_game(self: Self) -> None:
+        pass
 
     def next_turn(self: Self) -> None:
-        self.board.rotate()
+        def next_turn_callback() -> None:
+            self.current_player_index += 1
 
-        while not self.board.is_rotating:
-            time.sleep(1 / FPS)
+            if self.current_player_index >= len(self.infoset.players):
+                self.next_round()
+
+        self.board.rotate(next_turn_callback)
+
+    def on_mouse_press(self: Self, x: int, y: int, button: int, modifiers: int) -> None:
+        if button != arcade.MOUSE_BUTTON_LEFT:
+            return
+
+        for card_group in self.card_sprites:
+            card_group.mouse_click(x, y)
+
+        self.banker_card_sprites.mouse_click(x, y)
 
     def on_update(self: Self, delta: float) -> None:
         pass
@@ -82,3 +99,14 @@ class TractorCardGame(arcade.Window):
         self.clear(BACKGROUND_COLOR)
         self.board.draw()
         self.card_sprites[self.current_player_index].draw()
+
+        x_position: float = SCREEN_WIDTH / 2
+        y_position: float = SCREEN_HEIGHT * 9 / 32
+        arcade.draw_text(
+            str(self.infoset.players[self.current_player_index]),
+            x_position,
+            y_position,
+            color=arcade.color.BLACK,
+            anchor_x="center",
+            anchor_y="center",
+        )

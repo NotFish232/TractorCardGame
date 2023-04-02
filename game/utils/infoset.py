@@ -29,6 +29,12 @@ class InfoSet:
         self.bank_cards: list[Card] = []
 
     def __str__(self: Self) -> None:
-        return "Infoset: " + "".join(f"\n\t{k} = {v}" for k, v in self.__dict__.items())
+        format_players: Callable[..., str] = (
+            lambda p: "[" + ",".join(f"\n\t\t{i}" for i in p) + "\n\t]"
+        )
+        return "Infoset:" + "".join(
+            f"\n\t{k} = {v if k != 'players' else format_players(v)}"
+            for k, v in self.__dict__.items()
+        )
 
     __repr__: Callable[..., str] = __str__

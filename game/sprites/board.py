@@ -1,6 +1,7 @@
 import math
 
 import arcade
+from typing import Callable
 from typing_extensions import Self
 
 BOARD_COLOR: arcade.Color = (53, 101, 77)
@@ -20,11 +21,11 @@ class Board:
 
         self.points: arcade.PointList = self.make_points()
 
-    def rotate(self: Self) -> None:
-        self.is_rotating: bool = True
+    def rotate(self: Self, callback: Callable[..., None] = None) -> None:
+        self.is_rotating = True
         # number of frames to run animation
         NUMBER_OF_FRAMES: int = 100
-        iteration: float = 0
+        iteration: int = 0
         full_rotation_angle: float = 2 * math.pi / self.number_of_sides
 
         def _rotate(_: int) -> None:
@@ -38,6 +39,9 @@ class Board:
             if iteration == NUMBER_OF_FRAMES:
                 arcade.unschedule(_rotate)
                 self.is_rotating = False
+
+                if callback is not None:
+                    callback()
 
         arcade.schedule(_rotate, 0.01)
 

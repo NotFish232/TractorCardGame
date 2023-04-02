@@ -2,7 +2,7 @@ import random
 
 from typing_extensions import Self
 
-from ..sprites.card import Card, Rank, Suit
+from .card import Card, Rank, Suit
 
 
 class CardDeck:
