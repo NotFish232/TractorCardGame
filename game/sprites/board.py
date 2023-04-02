@@ -1,7 +1,7 @@
 import math
+from typing import Callable
 
 import arcade
-from typing import Callable
 from typing_extensions import Self
 
 BOARD_COLOR: arcade.Color = (53, 101, 77)

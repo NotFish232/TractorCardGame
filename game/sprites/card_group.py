@@ -1,7 +1,9 @@
 from functools import total_ordering
 from pathlib import Path
+
 import arcade
 from typing_extensions import Self
+
 from game.utils.card import Card
 
 ASSETS_FOLDER: str = Path(__file__).parent.parent / "assets/cards"
@@ -43,13 +45,15 @@ class CardGroup:
             self.sprite_list.append(sprite)
 
         if x_position is not None and y_position is not None:
-            self.set_position(x_position, y_position)
+            self.set_position()
 
-    def set_position(self: Self, x_position: float, y_position: float) -> None:
-        x_offset: float = x_position - CARD_SPACING * ((len(self.sprite_list) - 1) / 2)
+    def set_position(self: Self) -> None:
+        x_offset: float = self.x_position - CARD_SPACING * (
+            (len(self.sprite_list) - 1) / 2
+        )
 
         for i, sprite in enumerate(self.sprite_list):
-            sprite.set_position(x_offset + i * CARD_SPACING, y_position)
+            sprite.set_position(x_offset + i * CARD_SPACING, self.y_position)
 
     def card_to_filename(self: Self, card: Card) -> None:
         return str(card).replace(" ", "_").lower() + ".png"
