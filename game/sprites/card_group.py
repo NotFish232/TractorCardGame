@@ -1,9 +1,7 @@
-from functools import total_ordering
+import math
 from pathlib import Path
-
 import arcade
 from typing_extensions import Self
-
 from game.utils.card import Card
 
 ASSETS_FOLDER: str = Path(__file__).parent.parent / "assets/cards"
@@ -28,32 +26,47 @@ class CardGroup:
         x_position: float = None,
         y_position: float = None,
         *,
+        rotation: float = 0,
+        size: int = 1,
         is_visible: bool = True,
         is_interactable: bool = True,
     ) -> None:
 
         self.sprite_list: arcade.SpriteList = arcade.SpriteList()
-        self.x_position: float = x_position
-        self.y_position: float = y_position
+        self.rotation: float = rotation
         self.is_visible: bool = is_visible
         self.is_interactable: bool = is_interactable
         self.selected_cards = []
 
         for card in cards:
             filename: str = self.card_to_filename(card)
-            sprite: arcade.Sprite = arcade.Sprite(ASSETS_FOLDER / filename, CARD_SCALE)
+            sprite: arcade.Sprite = arcade.Sprite(
+                ASSETS_FOLDER / filename, size * CARD_SCALE
+            )
             self.sprite_list.append(sprite)
 
         if x_position is not None and y_position is not None:
-            self.set_position()
+            self.set_position(x_position, y_position)
 
-    def set_position(self: Self) -> None:
-        x_offset: float = self.x_position - CARD_SPACING * (
-            (len(self.sprite_list) - 1) / 2
-        )
+    def set_position(
+        self: Self, x_position: float, y_position: float, rotation: float = None
+    ) -> None:
+        self.x_position: float = x_position
+        self.y_position: float = y_position
+
+        if rotation is not None:
+            self.rotation = rotation
+
+        offset: float = CARD_SPACING * ((len(self.sprite_list) - 1) / 2)
+        x_offset: float = x_position - offset * math.cos(self.rotation)
+        y_offset: float = y_position - offset * math.sin(self.rotation)
 
         for i, sprite in enumerate(self.sprite_list):
-            sprite.set_position(x_offset + i * CARD_SPACING, self.y_position)
+            sprite.set_position(
+                x_offset + i * CARD_SPACING * math.cos(self.rotation),
+                y_offset + i * CARD_SPACING * math.sin(self.rotation),
+            )
+            sprite.angle = math.degrees(self.rotation)
 
     def card_to_filename(self: Self, card: Card) -> None:
         return str(card).replace(" ", "_").lower() + ".png"
@@ -83,22 +96,25 @@ class CardGroup:
                 # only intersect with first clicked sprite
                 break
 
-    def get_selected_card_indices(
+    """
+    Indexes are sorted in reverse order 
+    """
+
+    def get_selected_card_idxs(
         self: Self, clear_selected: bool = True, clear_sprites: bool = True
     ) -> list[int]:
-        indices: list[int] = self.selected_cards
+        idxs: list[int] = sorted(self.selected_cards, reverse=True)
 
         if clear_sprites:
-            reversed_indices: list[int] = sorted(indices, reverse=True)
-            for idx in reversed_indices:
+            for idx in idxs:
                 self.sprite_list.pop(idx)
 
-            self.set_position()
+            self.set_position(self.x_position, self.y_position)
 
         if clear_selected:
             self.selected_cards.clear()
 
-        return indices
+        return idxs
 
     def draw(self: Self) -> None:
         if self.is_visible:
