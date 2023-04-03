@@ -4,11 +4,11 @@ import arcade
 from arcade import gui
 from typing_extensions import Self
 
-from game.utils.card import Card
-from game.utils.card_deck import CardDeck
-from game.utils.infoset import InfoSet
-from game.utils.player import Player
-from game.utils.team import Team
+from utils.card import Card
+from utils.card_deck import CardDeck
+from utils.infoset import InfoSet
+from utils.player import Player
+from utils.team import Team
 
 from .sprites.board import Board
 from .sprites.card_group import CardGroup
@@ -44,8 +44,10 @@ class TractorCardGame(arcade.Window):
         self.ui_manager: gui.UIManager = self.make_ui()
         self.ui_manager.enable()
 
-        self.set_update_rate(1 / FPS)
         self.deal_cards()
+        self.set_card_positions()
+
+        self.set_update_rate(1 / FPS)
 
     def make_ui(self: Self) -> gui.UIManager:
         PADDING: int = 15
@@ -90,27 +92,28 @@ class TractorCardGame(arcade.Window):
         self.next_turn()
 
     def deal_cards(self: Self) -> None:
-        x_position: float = SCREEN_WIDTH / 2
-        y_position: float = SCREEN_HEIGHT * 1 / 8
-
         for _ in range(NUM_DEAL_CARDS):
             for player in self.infoset.players:
                 card: Card = self.card_deck.deal_card()
                 player.cards.append(card)
 
+        while self.card_deck.has_cards():
+            card: Card = self.card_deck.deal_card()
+            self.infoset.bank_cards.append(card)
+
+    def set_card_positions(self: Self) -> None:
+        x_position: float = SCREEN_WIDTH / 2
+        y_position: float = SCREEN_HEIGHT * 1 / 8
+
         self.card_sprites = [
             CardGroup(
-                p.cards,
+                player.cards,
                 x_position,
                 y_position,
                 is_visible=(i == self.current_player_index),
             )
-            for i, p in enumerate(self.infoset.players)
+            for i, player in enumerate(self.infoset.players)
         ]
-
-        while self.card_deck.has_cards():
-            card: Card = self.card_deck.deal_card()
-            self.infoset.bank_cards.append(card)
 
         self.banker_card_sprites = CardGroup(self.infoset.bank_cards, is_visible=False)
 

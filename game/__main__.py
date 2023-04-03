@@ -1,5 +1,4 @@
-from .tcg import TractorCardGame
-
+from . import TractorCardGame
 
 def main() -> None:
     game: TractorCardGame = TractorCardGame()

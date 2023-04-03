@@ -10,9 +10,9 @@ class CardDeck:
         self.cards: list[Card] = []
         self.num_card_decks: int = num_card_decks
 
-        self.make_cards()
+        self.new_deck()
 
-    def make_cards(self: Self) -> None:
+    def new_deck(self: Self) -> None:
         self.cards.clear()
 
         for rank in Rank:

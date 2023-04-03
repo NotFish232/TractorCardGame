@@ -2,7 +2,7 @@ import math
 from pathlib import Path
 import arcade
 from typing_extensions import Self
-from game.utils.card import Card
+from utils.card import Card
 
 ASSETS_FOLDER: str = Path(__file__).parent.parent / "assets/cards"
 CARD_SCALE: float = 0.2
@@ -28,14 +28,12 @@ class CardGroup:
         *,
         rotation: float = 0,
         size: int = 1,
-        is_visible: bool = True,
-        is_interactable: bool = True,
+        is_visible: bool = True
     ) -> None:
 
         self.sprite_list: arcade.SpriteList = arcade.SpriteList()
         self.rotation: float = rotation
         self.is_visible: bool = is_visible
-        self.is_interactable: bool = is_interactable
         self.selected_cards = []
 
         for card in cards:
@@ -57,7 +55,7 @@ class CardGroup:
         if rotation is not None:
             self.rotation = rotation
 
-        offset: float = CARD_SPACING * ((len(self.sprite_list) - 1) / 2)
+        offset: float = CARD_SPACING * (len(self.sprite_list) - 1) / 2
         x_offset: float = x_position - offset * math.cos(self.rotation)
         y_offset: float = y_position - offset * math.sin(self.rotation)
 
@@ -77,7 +75,7 @@ class CardGroup:
         )
 
     def mouse_click(self: Self, x: int, y: int) -> None:
-        if not self.is_visible or not self.is_interactable:
+        if not self.is_visible:
             return
 
         # iterate backwards to prevent weird overlapping
