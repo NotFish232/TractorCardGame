@@ -20,8 +20,8 @@ class Rank(Enum):
     Queen = 12
     King = 13
     Ace = 14
-    BlackJoker = 15
-    RedJoker = 16
+    BlackJoker = 30
+    RedJoker = 31
 
     def __lt__(self: Self, other: object) -> None:
         if isinstance(other, Rank):
@@ -30,20 +30,15 @@ class Rank(Enum):
         raise NotImplementedError("Comparison only supported between rank objects")
 
 
-@total_ordering
 class Suit(Enum):
-    Spades = 1
-    Clubs = 2
-    Hearts = 3
-    Diamonds = 4
 
-    def __lt__(self: Self, other: object) -> None:
-        if isinstance(other, Suit):
-            return self.value < other.value
-
-        raise NotImplementedError("Comparison only supported between suit objects")
+    Hearts = "♥"
+    Diamonds = "♦"
+    Clubs = "♣"
+    Spades = "♠"
 
 
+@total_ordering
 class Card:
     def __init__(self: Self, *, rank: Rank, suit: Suit = None) -> None:
         if rank != Rank.BlackJoker and rank != Rank.RedJoker:
@@ -54,9 +49,6 @@ class Card:
 
         self.rank: Rank = rank
         self.suit: Suit = suit
-
-    def __hash__(self: Self) -> int:
-        return hash((self.rank, self.suit))
 
     def __eq__(self: Self, other: object) -> bool:
         if isinstance(other, Card):
@@ -71,11 +63,17 @@ class Card:
         raise NotImplementedError("Comparision only supported with other card objects")
 
     def __str__(self: Self) -> str:
-        if self.rank == Rank.BlackJoker:
-            return "Black Joker"
         if self.rank == Rank.RedJoker:
             return "Red Joker"
+        if self.rank == Rank.BlackJoker:
+            return "Black Joker"
 
         return f"{self.rank.name} of {self.suit.name}"
 
-    __repr__: Callable[..., str] = __str__
+    def __repr__(self: Self) -> str:
+        if self.rank == Rank.RedJoker:
+            return "rJoker"
+        if self.rank == Rank.BlackJoker:
+            return "bJoker"
+
+        return f"{self.rank.value if self.rank.value <= 10 else self.rank.name[0]}{self.suit.value}"

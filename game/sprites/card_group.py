@@ -1,7 +1,9 @@
 import math
 from pathlib import Path
+
 import arcade
 from typing_extensions import Self
+
 from utils.card import Card
 
 ASSETS_FOLDER: str = Path(__file__).parent.parent / "assets/cards"

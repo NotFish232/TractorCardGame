@@ -2,9 +2,11 @@ import math
 from typing import Callable
 
 import arcade
-from .card_group import CardGroup
-from utils.card import Card
 from typing_extensions import Self
+
+from utils.card import Card
+
+from .card_group import CardGroup
 
 BOARD_COLOR: arcade.Color = (53, 101, 77)
 BORDER_COLOR: arcade.Color = (61, 16, 5)

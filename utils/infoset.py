@@ -14,10 +14,10 @@ class InfoSet:
         self.trump_suit: Suit = None
 
         # play sequence of cards this round
-        self.round_play_seq: list[tuple[Card]] = []
+        self.round_play_seq: list[list[Card]] = []
 
         # history of all plays for the entire game
-        self.history_play_seq: list[tuple[Card]] = []
+        self.game_play_seq: list[list[Card]] = []
 
         # list of the teams in the game
         self.teams: list[Team] = []
@@ -27,6 +27,20 @@ class InfoSet:
 
         # list of bank cards
         self.bank_cards: list[Card] = []
+
+        # index of current player
+        self.cur_player_idx: int = 0
+
+        # index of starting player
+        self.starting_player_idx: int = 0
+
+    @property
+    def current_player(self: Self) -> Player:
+        return self.players[self.cur_player_idx]
+
+    @property
+    def starting_player(self: Self) -> Player:
+        return self.players[self.starting_player_idx]
 
     def __str__(self: Self) -> None:
         format_players: Callable[..., str] = (

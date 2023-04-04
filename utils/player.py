@@ -18,10 +18,6 @@ class Player:
         self.id: int = Player.next_avaliable_id
         Player.next_avaliable_id += 1
 
-    @property
-    def test(self: Self) -> None:
-        pass
-
     def __eq__(self: Self, other: object) -> None:
         if isinstance(other, Player):
             return self.id == other.id
