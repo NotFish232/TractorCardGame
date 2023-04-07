@@ -37,7 +37,9 @@ class Board:
     def clear_cards(self: Self) -> None:
         self.card_sprites.clear()
 
-    def rotate(self: Self, callback: Callable[..., None] = None, *args, **kwargs) -> None:
+    def rotate(
+        self: Self, callback: Callable[..., None] = None, *args, **kwargs
+    ) -> None:
         self.is_rotating = True
         # number of frames to run animation
         NUMBER_OF_FRAMES: int = 100

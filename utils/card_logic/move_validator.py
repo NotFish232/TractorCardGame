@@ -82,21 +82,25 @@ def is_first_move_valid(move: list[Card], infoset: InfoSet) -> bool:
 
 
 def is_trump(card: Card, infoset: InfoSet) -> bool:
-        return (
-            card.rank == Rank.RedJoker
-            or card.rank == Rank.BlackJoker
-            or card.suit == infoset.trump_suit
-            or card.rank == infoset.trump_rank
-        )
+    return (
+        card.rank == Rank.RedJoker
+        or card.rank == Rank.BlackJoker
+        or card.suit == infoset.trump_suit
+        or card.rank == infoset.trump_rank
+    )
+
 
 def get_suits(cards: list[Card], suit: Suit, infoset: InfoSet) -> list[Card]:
     return [c for c in cards if c.suit == suit and not is_trump(c, infoset)]
 
+
 def get_suit_count(cards: list[Card], suit: Suit, infoset: InfoSet) -> int:
     return len(get_suits(cards, suit, infoset))
 
+
 def get_trumps(cards: list[Card], infoset: InfoSet) -> list[Card]:
     return [c for c in cards if is_trump(c, infoset)]
+
 
 def get_trump_count(cards: list[Card], infoset: InfoSet) -> int:
     return len(get_trumps(cards, infoset))

@@ -6,11 +6,11 @@ from typing_extensions import Self
 
 from utils.card import Card, Rank, Suit
 from utils.card_deck import CardDeck
+from utils.card_logic.card_utils import get_round_pts, get_round_winner, sort_cards
+from utils.card_logic.move_validator import is_move_valid
 from utils.infoset import InfoSet
 from utils.player import Player
 from utils.team import Team
-from utils.card_logic.move_validator import is_move_valid
-from utils.card_logic.card_utils import sort_cards, get_round_pts, get_round_winner
 
 from .sprites.board import Board
 from .sprites.card_group import CardGroup
@@ -227,9 +227,7 @@ class TractorCardGame(arcade.Window):
             self.ui_manager.enable()
             return
 
-        for card_group in self.card_sprites:
-            card_group.mouse_click(x, y)
-
+        self.card_sprites[self.infoset.cur_player_idx].mouse_click(x, y)
         self.banker_card_sprites.mouse_click(x, y)
 
     def on_draw(self: Self) -> None:

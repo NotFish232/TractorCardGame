@@ -1,9 +1,7 @@
 from utils.card import Card, Rank, Suit
 from utils.infoset import InfoSet
+
 from .pattern import Pattern
-
-
-
 
 
 def get_round_winner(infoset: InfoSet) -> int:
@@ -22,9 +20,8 @@ def get_round_winner(infoset: InfoSet) -> int:
         if pattern > highest_pattern:
             highest_idx = idx
             highest_pattern = pattern
-    
-    return highest_idx
 
+    return highest_idx
 
 
 def get_round_pts(infoset: InfoSet) -> int:
@@ -39,7 +36,6 @@ def get_round_pts(infoset: InfoSet) -> int:
             if card.rank == Rank.Five:
                 pts += 5
     return pts
-
 
 
 def sort_cards(cards: list[Card], infoset: InfoSet) -> None:
@@ -65,8 +61,3 @@ def sort_cards(cards: list[Card], infoset: InfoSet) -> None:
         return c.rank.value + c.suit.value * 13
 
     cards.sort(key=_sorting_key, reverse=True)
-
-
-
-
-

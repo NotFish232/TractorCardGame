@@ -56,7 +56,6 @@ class Card:
 
         self.rank: Rank = rank
         self.suit: Suit = suit
-    
 
     def __eq__(self: Self, other: object) -> bool:
         if isinstance(other, Card):

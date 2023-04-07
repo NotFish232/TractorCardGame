@@ -1,7 +1,8 @@
 from utils.card_logic.move_validator import is_move_valid
 
+
 def test() -> None:
-        """
+    """
 
     // Parameters:
     //      1. rule: global game rules
@@ -12,8 +13,8 @@ def test() -> None:
     //      6. cardToPlay: card to be played by the current player, pre-sorted
     //      7. currentHands: the remaining hand of the current player, pre-sorted
     //
-        """
-        """
+    """
+    """
 
         let game = { status: {}, rule: {} };
         game.rule = { H5: false, startingRank: 9, turbo: true, cardSet: 4, dealAll: false, trumpSuit: true, rankJoker: true };
@@ -170,6 +171,7 @@ def test() -> None:
     });
 });
 """
+
 
 if __name__ == "__main__":
     test()

@@ -38,8 +38,6 @@ class InfoSet:
             if key in self.__dict__:
                 self.__dict__[key] = val
 
-    
-    
     @property
     def num_players(self: Self) -> int:
         return len(self.players)

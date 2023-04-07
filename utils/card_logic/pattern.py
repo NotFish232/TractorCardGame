@@ -1,8 +1,10 @@
+from enum import Enum
+from typing import Callable
+
+from typing_extensions import Self
+
 from utils.card import Card, Rank, Suit
 from utils.infoset import InfoSet
-from typing import Callable
-from enum import Enum
-from typing_extensions import Self
 
 
 class PatternType(Enum):
@@ -113,13 +115,16 @@ class Pattern:
 
     def __str__(self: Self) -> str:
         pass
- 
+
     def _is_consecutive(self: Self, card1: Card, card2: Card) -> bool:
         if card2.rank == Rank.RedJoker:
             return card1.rank == Rank.BlackJoker
 
         if card2.rank == Rank.BlackJoker:
-            return card1.rank == self.infoset.trump_rank and card1.suit == self.infoset.trump_suit
+            return (
+                card1.rank == self.infoset.trump_rank
+                and card1.suit == self.infoset.trump_suit
+            )
 
         if card2.rank == self.infoset.trump_rank:
             if card2.suit == self.infoset.trump_suit:
@@ -202,10 +207,16 @@ class Pattern:
         if card2.rank == Rank.BlackJoker:
             return False
 
-        if card1.suit == self.infoset.trump_suit and card1.rank == self.infoset.trump_rank:
+        if (
+            card1.suit == self.infoset.trump_suit
+            and card1.rank == self.infoset.trump_rank
+        ):
             return True
 
-        if card2.suit == self.infoset.trump_suit and card2.rank == self.infoset.trump_rank:
+        if (
+            card2.suit == self.infoset.trump_suit
+            and card2.rank == self.infoset.trump_rank
+        ):
             return False
 
         if card1.rank == self.infoset.trump_rank:
