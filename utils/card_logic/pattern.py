@@ -95,7 +95,7 @@ class Pattern:
     def __gt__(self: Self, other: object) -> bool:
         if isinstance(other, Pattern):
             # seems really weird check equality inside >, but equality only checks that the patterns are the same
-            if not self == other:
+            if self != other:
                 return False
 
             for freq in self.card_groups.keys():
