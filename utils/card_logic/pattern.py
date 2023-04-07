@@ -77,10 +77,6 @@ class Pattern:
 
     def __eq__(self: Self, other: object) -> bool:
         if isinstance(other, Pattern):
-            # check for same pattern type
-            if self.type != other.type:
-                return False
-
             # check that in the same suit
             if self.card_suits.keys() != other.card_suits.keys():
                 return False
@@ -88,13 +84,11 @@ class Pattern:
             # check that same freqs, each freq has the same number of cards
             if self.card_groups.keys() != other.card_groups.keys():
                 return False
-            if any(
-                len(c1) != len(c2)
+            
+            return all(
+                len(c1) == len(c2)
                 for c1, c2 in zip(self.card_groups.values(), other.card_groups.values())
-            ):
-                return False
-
-            return True
+            )
 
         raise NotImplementedError()
 
