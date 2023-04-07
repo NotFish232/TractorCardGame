@@ -20,8 +20,8 @@ class Rank(Enum):
     Queen = 12
     King = 13
     Ace = 14
-    BlackJoker = 30
-    RedJoker = 31
+    BlackJoker = 15
+    RedJoker = 16
 
     def __lt__(self: Self, other: object) -> None:
         if isinstance(other, Rank):
@@ -31,11 +31,18 @@ class Rank(Enum):
 
 
 class Suit(Enum):
+    Hearts = 0
+    Diamonds = 1
+    Clubs = 2
+    Spades = 3
 
-    Hearts = "♥"
-    Diamonds = "♦"
-    Clubs = "♣"
-    Spades = "♠"
+
+suit_to_symbol: dict[Suit, str] = {
+    Suit.Hearts: "♥",
+    Suit.Diamonds: "♦",
+    Suit.Clubs: "♣",
+    Suit.Spades: "♠",
+}
 
 
 @total_ordering
@@ -49,6 +56,7 @@ class Card:
 
         self.rank: Rank = rank
         self.suit: Suit = suit
+    
 
     def __eq__(self: Self, other: object) -> bool:
         if isinstance(other, Card):
@@ -76,4 +84,6 @@ class Card:
         if self.rank == Rank.BlackJoker:
             return "bJoker"
 
-        return f"{self.rank.value if self.rank.value <= 10 else self.rank.name[0]}{self.suit.value}"
+        suit_symbol: str = suit_to_symbol[self.suit]
+
+        return f"{self.rank.value if self.rank.value <= 10 else self.rank.name[0]}{suit_symbol}"

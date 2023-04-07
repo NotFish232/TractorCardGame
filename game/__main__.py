@@ -9,16 +9,7 @@ def random_predictor(infoset: InfoSet) -> list[Card]:
 
 
 def main() -> None:
-    game: TractorCardGame = TractorCardGame(
-        predictors=[
-            None,
-            random_predictor,
-            None,
-            random_predictor,
-            None,
-            random_predictor,
-        ]
-    )
+    game: TractorCardGame = TractorCardGame(predictors=[None] * 6)
     game.run()
 
 

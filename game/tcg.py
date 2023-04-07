@@ -4,11 +4,13 @@ import arcade
 from arcade import gui
 from typing_extensions import Self
 
-from utils.card import Card
+from utils.card import Card, Rank, Suit
 from utils.card_deck import CardDeck
 from utils.infoset import InfoSet
 from utils.player import Player
 from utils.team import Team
+from utils.card_logic.move_validator import is_move_valid
+from utils.card_logic.card_utils import sort_cards, get_round_pts, get_round_winner
 
 from .sprites.board import Board
 from .sprites.card_group import CardGroup
@@ -32,8 +34,6 @@ class TractorCardGame(arcade.Window):
     ) -> None:
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-        self.number_of_players: int = number_of_players
-
         self.infoset: InfoSet = InfoSet()
         self.banker_card_sprites: CardGroup = None
         self.card_sprites: list[CardGroup] = []
@@ -43,6 +43,7 @@ class TractorCardGame(arcade.Window):
             Player(team=self.infoset.teams[i % 2 != 0])
             for i in range(number_of_players)
         ]
+        self.infoset.starting_player.is_banker = True
 
         self.board: Board = Board(SCREEN_WIDTH, SCREEN_HEIGHT, number_of_players)
         self.ui_manager: gui.UIManager = self.make_ui()
@@ -58,9 +59,11 @@ class TractorCardGame(arcade.Window):
             predictors or [None] * number_of_players
         )
 
+        self.infoset.trump_rank = Rank.Four
+        self.infoset.trump_suit = Suit.Diamonds
+
         self.deal_cards()
         self.set_card_positions()
-        self.on_turn_start()
 
         self.set_update_rate(1 / FPS)
 
@@ -115,18 +118,23 @@ class TractorCardGame(arcade.Window):
         self.ui_manager.disable()
 
     def on_select_cards_btn_click(self: Self, e: gui.UIOnClickEvent) -> None:
-        current_player: Player = self.infoset.players[self.infoset.cur_player_idx]
+        current_player: Player = self.infoset.current_player
         selected_card_idxs: list[int] = self.card_sprites[
             self.infoset.cur_player_idx
-        ].get_selected_card_idxs()
-        selected_cards: list[Card] = []
+        ].get_selected_card_idxs(clear_selected=False, clear_sprites=False)
 
+        move: list[Card] = [current_player.cards[idx] for idx in selected_card_idxs]
+
+        if not is_move_valid(move, self.infoset):
+            return
+
+        # clear card sprites and current player cards
+        self.card_sprites[self.infoset.cur_player_idx].get_selected_card_idxs()
         for idx in selected_card_idxs:
-            selected_cards.append(current_player.cards.pop(idx))
+            current_player.cards.pop(idx)
 
-        self.infoset.round_play_seq.append(selected_cards)
-        self.board.add_cards(selected_cards)
-
+        self.infoset.round_play_seq.append(move)
+        self.board.add_cards(move)
         self.next_turn()
 
     def deal_cards(self: Self) -> None:
@@ -134,36 +142,42 @@ class TractorCardGame(arcade.Window):
             for player in self.infoset.players:
                 card: Card = self.card_deck.deal_card()
                 player.cards.append(card)
+        for player in self.infoset.players:
+            sort_cards(player.cards, self.infoset)
 
         while self.card_deck.has_cards():
             card: Card = self.card_deck.deal_card()
             self.infoset.bank_cards.append(card)
+
+        sort_cards(self.infoset.bank_cards, self.infoset)
 
     def set_card_positions(self: Self) -> None:
         x_position: float = SCREEN_WIDTH / 2
         y_position: float = SCREEN_HEIGHT * 1 / 8
 
         self.card_sprites = [
-            CardGroup(
-                player.cards,
-                x_position,
-                y_position,
-                is_visible=(i == self.infoset.cur_player_idx),
-            )
-            for i, player in enumerate(self.infoset.players)
+            CardGroup(player.cards, x_position, y_position)
+            for player in self.infoset.players
         ]
 
-        self.banker_card_sprites = CardGroup(self.infoset.bank_cards, is_visible=False)
-
+        self.banker_card_sprites = CardGroup(
+            self.infoset.bank_cards, SCREEN_WIDTH * 27 / 32, SCREEN_HEIGHT * 7 / 16
+        )
 
     def next_round(self: Self) -> None:
-        self.infoset.cur_player_idx = 0
+        round_winner_idx: int = get_round_winner(self.infoset)
+
+        self.infoset.cur_player_idx = round_winner_idx
+        self.infoset.starting_player_idx = round_winner_idx
+
+        self.infoset.players[round_winner_idx].team.points += get_round_pts(
+            self.infoset
+        )
+
         self.infoset.game_play_seq.extend(self.infoset.round_play_seq)
         self.infoset.round_play_seq.clear()
 
     def on_turn_start(self: Self) -> None:
-        self.card_sprites[self.infoset.cur_player_idx].is_visible = True
-
         predictor: Callable[[InfoSet], list[Card]] = self.predictors[
             self.infoset.cur_player_idx
         ]
@@ -173,6 +187,7 @@ class TractorCardGame(arcade.Window):
             def _make_prediction(_: float) -> None:
                 arcade.unschedule(_make_prediction)
                 move: list[Card] = predictor(self.infoset)
+
                 self.infoset.round_play_seq.append(move)
                 self.board.add_cards(move)
                 self.next_turn()
@@ -180,21 +195,23 @@ class TractorCardGame(arcade.Window):
             arcade.schedule(_make_prediction, 1)
 
     def next_turn(self: Self) -> None:
-        def next_turn_callback() -> None:
-            self.card_sprites[self.infoset.cur_player_idx].is_visible = False
-            self.infoset.cur_player_idx += 1
-
-            if self.infoset.cur_player_idx >= len(self.infoset.players):
+        def next_turn_callback(round_over: bool = False) -> None:
+            if round_over:
                 self.next_round()
+            else:
+                self.infoset.cur_player_idx += 1
+                self.infoset.cur_player_idx %= self.infoset.num_players
 
             self.on_turn_start()
 
-        if self.infoset.cur_player_idx == len(self.infoset.players) - 1:
+        if (
+            self.infoset.cur_player_idx + 1
+        ) % self.infoset.num_players == self.infoset.starting_player_idx:
 
             def _end_round(_: float) -> None:
                 arcade.unschedule(_end_round)
                 self.board.clear_cards()
-                self.board.rotate(next_turn_callback)
+                self.board.rotate(next_turn_callback, round_over=True)
 
             arcade.schedule(_end_round, 2)
         else:
@@ -220,9 +237,20 @@ class TractorCardGame(arcade.Window):
         self.board.draw()
         self.card_sprites[self.infoset.cur_player_idx].draw()
 
+        if self.infoset.current_player.is_banker:
+            arcade.draw_text(
+                "Bank Cards",
+                SCREEN_WIDTH * 27 / 32,
+                SCREEN_HEIGHT * 9 / 16,
+                color=arcade.color.BLACK,
+                anchor_x="center",
+                anchor_y="center",
+            )
+            self.banker_card_sprites.draw()
+
         # write play information
         arcade.draw_text(
-            str(self.infoset.players[self.infoset.cur_player_idx]),
+            str(self.infoset.current_player),
             SCREEN_WIDTH / 2,
             SCREEN_HEIGHT * 9 / 32,
             color=arcade.color.BLACK,

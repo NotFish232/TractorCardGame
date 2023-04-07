@@ -29,13 +29,11 @@ class CardGroup:
         y_position: float = None,
         *,
         rotation: float = 0,
-        size: int = 1,
-        is_visible: bool = True
+        size: int = 1
     ) -> None:
 
         self.sprite_list: arcade.SpriteList = arcade.SpriteList()
         self.rotation: float = rotation
-        self.is_visible: bool = is_visible
         self.selected_cards = []
 
         for card in cards:
@@ -77,8 +75,6 @@ class CardGroup:
         )
 
     def mouse_click(self: Self, x: int, y: int) -> None:
-        if not self.is_visible:
-            return
 
         # iterate backwards to prevent weird overlapping
         for i in range(len(self.sprite_list) - 1, -1, -1):
@@ -117,5 +113,4 @@ class CardGroup:
         return idxs
 
     def draw(self: Self) -> None:
-        if self.is_visible:
-            self.sprite_list.draw()
+        self.sprite_list.draw()

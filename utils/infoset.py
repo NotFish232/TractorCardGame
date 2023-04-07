@@ -8,7 +8,7 @@ from .team import Team
 
 
 class InfoSet:
-    def __init__(self: Self) -> None:
+    def __init__(self: Self, **kwargs) -> None:
         # trump rank and suit
         self.trump_rank: Rank = None
         self.trump_suit: Suit = None
@@ -33,6 +33,16 @@ class InfoSet:
 
         # index of starting player
         self.starting_player_idx: int = 0
+
+        for key, val in kwargs.items():
+            if key in self.__dict__:
+                self.__dict__[key] = val
+
+    
+    
+    @property
+    def num_players(self: Self) -> int:
+        return len(self.players)
 
     @property
     def current_player(self: Self) -> Player:
